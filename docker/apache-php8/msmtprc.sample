@@ -1,0 +1,11 @@
+tls on
+tls_starttls on
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+tls_certcheck on
+auth on
+host example.com
+port 587
+from user@example.com
+user user@example.com
+password 123456
+logfile /app/runtime/logs/msmtp.log

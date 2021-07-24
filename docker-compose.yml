@@ -1,0 +1,46 @@
+version: "3.7"
+
+networks:
+  net: {}
+
+services:
+
+  web:
+    build:
+        context: ./docker/apache-php8
+        dockerfile: ./Dockerfile
+    ports:
+      - 8020:80
+    environment:
+      MYSQL_HOST: 'mysql'
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: ''
+      MYSQL_DATABASE: 'dbname'
+    volumes:
+      - .:/app
+    depends_on:
+      - mysql
+    networks:
+      net:
+        aliases: 
+            - localhost
+
+  # https://docs.docker.com/samples/library/mysql/
+  mysql:
+    image: mysql:5.7
+    ports:
+      - 33306:3306
+    volumes:
+      - ./runtime/mysql:/var/lib/mysql
+    command:
+      - --sql-mode=
+      - --character-set-server=utf8
+      - --collation-server=utf8_general_ci
+      - --skip-character-set-client-handshake
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+      MYSQL_USER: 'root'
+      MYSQL_PASSWORD: ''
+      MYSQL_DATABASE: 'dbname'
+    networks:
+      net: 

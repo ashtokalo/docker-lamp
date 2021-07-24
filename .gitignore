@@ -1,0 +1,8 @@
+.idea
+.env
+runtime/*
+vendor/*
+web/.htaccess
+composer.lock
+docker/apache-php8/msmtprc
+
