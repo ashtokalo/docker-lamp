@@ -18,9 +18,7 @@ if [ -f msmtprc ]; then
     chown www-data:www-data /etc/msmtprc;
 # or use properties from .env file in project root
 elif [ -f ../../.env ]; then
-    ENV="/app/.env";
     LOG="/app/runtime/logs/msmtp.log";
-    export $(grep -v '^#' "$ENV" | xargs -d '\n');
     if [ -v SMTP_HOST ] && [ -v SMTP_USER ] && [ -v SMTP_PASSWORD ]; then
         if [ ! -v SMTP_PORT ]; then
             SMTP_PORT=25;
@@ -53,14 +51,64 @@ else
     echo "";
 fi;
 
-# configure default site in apache
-cp 000-default.conf /etc/apache2/sites-enabled/000-default.conf
+if [ ! -v ADMIN_EMAIL ]; then
+    ADMIN_EMAIL="admin@example.com"
+fi
+
+if [ ! -v HOST_NAME ]; then
+    HOST_NAME="localhost"
+fi
+
+# configure default site in Apache
+cat 000-default.conf \
+    | sed "s/admin@example\.com/$ADMIN_EMAIL/" \
+    | sed "s/localhost/$HOST_NAME/" \
+    > /etc/apache2/sites-enabled/000-default.conf
+
+# embed all options from php.env into php environment through Apache SetEnt
+if [ -f /app/php.env ]; then
+    cat /app/php.env \
+        | sed -E "s/^\s*([^#\s]+)\s*=\s*\"?([^\"]*)\"?\s*$/SetEnv \1 \"\2\"/" \
+        | grep SetEnv \
+        > /etc/apache2/conf-available/php-env-vars.conf
+else
+    touch /etc/apache2/conf-available/php-env-vars.conf
+fi
+
+# embed MySQL credentials from docker.env into php environment through Apache SetEnt
+if [ ! -v MYSQL_HOST ]; then
+    MYSQL_HOST="mysql"
+fi
+if [ ! -v MYSQL_PORT ]; then
+    MYSQL_PORT="3306"
+fi
+if [ ! -v MYSQL_USER ]; then
+    MYSQL_USER="root"
+fi
+if [ ! -v MYSQL_PASSWORD ]; then
+    MYSQL_PASSWORD=""
+fi
+if [ ! -v MYSQL_DATABASE ]; then
+    MYSQL_DATABASE="dbname"
+fi
+{ echo "SetEnv MYSQL_HOST \"$MYSQL_HOST\"";
+  echo "SetEnv MYSQL_PORT \"$MYSQL_PORT\"";
+  echo "SetEnv MYSQL_USER \"$MYSQL_USER\"";
+  echo "SetEnv MYSQL_PASSWORD '$MYSQL_PASSWORD'";
+  echo "SetEnv MYSQL_DATABASE \"$MYSQL_DATABASE\""; } >> /etc/apache2/conf-available/php-env-vars.conf
 
 # configure php
 cp php.ini /usr/local/etc/php/conf.d/docker.ini
 
-# take care about access righs to runtime directory
+# take care about access rights to runtime directory
 chmod ugo+w /app/runtime
 chmod ugo+w /app/runtime/logs
+
+if [ ! -v PHP_ENABLE_XDEBUG ] || [ "$PHP_ENABLE_XDEBUG" != "1" ]; then
+    if [ -f /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini ]; then
+        # disable xdebug
+        rm /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+    fi
+fi
 
 exec "$@"

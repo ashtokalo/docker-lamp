@@ -1,4 +1,5 @@
-FROM php:8.0-apache
+ARG PHP_IMAGE_VERSION
+FROM php:${PHP_IMAGE_VERSION}-apache
 MAINTAINER Alexey Shtokalo <alexey@shtokalo.net>
 
 # persistent dependencies
@@ -6,45 +7,40 @@ RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends
 
-# configure timezone as UTC
-ENV TZ=UTC
+# configure timezone
+ARG TIMEZONE
 RUN set -ex; \
     unlink /etc/localtime; \
-    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime; \
-    echo $TZ > /etc/timezone
+    ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime; \
+    echo $TIMEZONE > /etc/timezone
 
 # install light SMTP client for mail support
 RUN set -ex; \
     apt-get install -y -q --no-install-recommends msmtp msmtp-mta
 
-# install system packages for PHP extensions recommended for Yii 2.0 Framework
+# install system packages for most used PHP extensions
 COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
 RUN install-php-extensions \
     soap \
     zip \
-#curl \
     bcmath \
     exif \
     gd \
-#iconv \
     intl \
-#mbstring \
     opcache \
     pdo_mysql \
     imagick \
     mongodb \
     xdebug
 
-# disable xdebug by default (see PHP_ENABLE_XDEBUG)
-RUN rm /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-
 # configure environment
 ENV COMPOSER_ALLOW_SUPERUSER=1 \
+    TIMEZONE=$TIMEZONE \
     PHP_USER_ID=33 \
     PHP_ENABLE_XDEBUG=0 \
     PATH=/app:/app/vendor/bin:/root/.composer/vendor/bin:$PATH \
     TERM=linux
-    
+
 # install composer
 RUN curl -sS https://getcomposer.org/installer | php -- \
     --version=2.1.3 \
