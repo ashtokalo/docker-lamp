@@ -1,9 +1,9 @@
 .idea
-docker.env
-php.env
+config/php.env
+config/php.ini
+config/msmtprc
+docker-compose.override.yml
 runtime/*
 vendor/*
 web/.htaccess
 composer.lock
-docker/apache-php8/msmtprc
-

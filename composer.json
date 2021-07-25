@@ -1,0 +1,22 @@
+{
+    "name": "ashtokalo/lampeton",
+    "description": "The LAMP application skeleton in docker environment to start development easy.",
+    "keywords": ["project template"],
+    "type": "project",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "app\\": "src"
+        }
+    },
+    "authors": [
+        {
+            "name": "Alexey Shtokalo",
+            "email": "alexey@shtokalo.net"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+
+    }
+}

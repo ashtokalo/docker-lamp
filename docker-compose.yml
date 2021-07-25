@@ -5,32 +5,45 @@ networks:
 
 services:
 
-  # https://hub.docker.com/_/php
   web:
+    image: lampeton_web
     build:
-      context: ./docker/apache-php8
+      context: ./docker/web
       dockerfile: ./Dockerfile
       args:
-        PHP_IMAGE_VERSION: "8.0"
-        TIMEZONE: UTC
+        - PHP_IMAGE_VERSION=8.0
+        - TZ=UTC
     ports:
-      - 8020:80
-    env_file:
-      - ./docker.env
+      - 80:80
+    environment:
+      - TZ=UTC
+      - ADMIN_EMAIL=admin@example.com
+      - PHP_ENABLE_XDEBUG=0
+      - PHP_XDEBUG_PORT=9055
+      - PHP_XDEBUG_IDEKEY=LAMPETON
+      - SMTP_PORT=587
+      - SMTP_HOST=example.com
+      - SMTP_USER=user@xample.com
+      - SMTP_PASSWORD=123456
+      - SMTP_FROM=user@example.com
+      - MYSQL_HOST=db
+      - MYSQL_USER=dbuser
+      - MYSQL_PASSWORD=dbpassword
+      - MYSQL_DATABASE=dbname
     volumes:
       - .:/app
     depends_on:
-      - mysql
+      - db
     networks:
       net:
         aliases: 
           - localhost
 
-  # https://hub.docker.com/_/mysql/
-  mysql:
+  db:
+    # https://hub.docker.com/_/mysql/
     image: mysql:5.7
     ports:
-      - 33306:3306
+      - 3306:3306
     volumes:
       - ./runtime/mysql:/var/lib/mysql
     command:
@@ -38,7 +51,10 @@ services:
       - --character-set-server=utf8
       - --collation-server=utf8_general_ci
       - --skip-character-set-client-handshake
-    env_file:
-      - docker.env
-    networks:
-      net: 
+    environment:
+      - TZ=UTC
+      - MYSQL_USER=dbuser
+      - MYSQL_PASSWORD=dbpassword
+      - MYSQL_DATABASE=dbname
+      - MYSQL_ALLOW_EMPTY_PASSWORD=1
+      - MYSQL_ROOT_PASSWORD=

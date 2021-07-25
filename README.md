@@ -3,55 +3,89 @@ Lampeton
 
 The LAMP application skeleton in docker environment to start development easy.
 
-This project provides application templates for different frameworks and
-scenarios. These templates let start development with well prepared environment
-and concentrate on idea. Each template is a separate branch with specific
-options. All branches based on main, which is most simple.
+This template provides classic LAMP docker-environment to code any PHP project.
+It has only two services `web` and `db`. The `web` is a Debian's Apache httpd in
+conjunction with PHP 8.0 or 7.4 (as mod_php) and uses mpm_prefork by default.
+The `db` is a MySQL 5.7 with one database.
+
+The [other templates](https://github.com/ashtokalo/lampeton/branches) available as well.
 
 ## Directory Structure
 
 ```
-docker                   contains resources to build docker environments
-    apache-php8          contains Apache httpd in conjunction with PHP
-runtime                  contains files generated during runtime
-    logs                 contains logs from Apache, PHP and SMTP services
-web                      contains the entry script and Web resources
+config      contains all configuration files
+docker      contains resources to build docker environments
+    web     contains Apache httpd in conjunction with PHP
+runtime     contains files generated during runtime, the only writable directory
+    logs    contains logs from Apache, PHP and SMTP services
+src         contains the application code
+web         contains the entry script and Web resources
 ```
 
-## Basic Environment
+## How to use
 
-Application uses docker with at least two basic services `web` and `mysql`.
+It would better to use [Composer](http://getcomposer.org/) to start development.
+You can try with following following command:
 
-The `web` services is a Debian's Apache httpd in conjunction with PHP 8.0
-(as mod_php) and uses mpm_prefork by default. It also contains SMTP client
-[msmtp][1] to let send emails from php with built-in function mail(). The `web`
-directory of the project used as a document root in Apache, so all other
-files are never available through HTTP. Any request of file or directory that
-doesn't exists will be redirected to `web/index.php`, so you can process the
-request as you wish.
+    composer create-project --prefer-dist ashtokalo/lampeton app
 
-There are few environment variables in `web` service used to share some options:
+The command creates directory `app` (you can choose a different one) with this
+project template. Otherwise, you can download and extract files from main branch
+of [repository](https://github.com/ashtokalo/lampeton).
 
-- `TIMEZONE` - name of system TIMEZONE, by default is `UTC`;
+Finally, you can start project immediately with docker command:
+
+    docker-compose up
+
+or in background mode:
+
+    docker-compose up -d
+
+It might takes a time at first start because it need to build an image for the
+`web` and `db` services.
+
+## Template
+
+The PHP works as mod_php in conjunction with Apache and most popular modules.
+A few environment variables contains helpful details to connect to database:
+
+- `MYSQL_DSN` - PHP PDO data source name;
 - `MYSQL_HOST` - the hostname of MySQL, by defailt is `mysql`;
 - `MYSQL_PORT` - port number to connect to MySQL, by default is `3306`;
 - `MYSQL_USER` - user to connect to MySQL, by default is `root`;
 - `MYSQL_PASSWORD` - password to connect to MySQL, by default is empty;
 - `MYSQL_DATABASE` - name of database in MySQL, by default is `dbname`.
 
-All options from `app.env` in project root also available as environment
-variables in PHP. See `app.env.dist` for example.
+The `web` directory of the project used as a document root in Apache, so all
+other files are never available through HTTP. Any request of file or directory
+that doesn't exists will be redirected to `web/index.php`, so you can process
+the request as you wish.
 
-Apache writes logs to `./runtime/logs/apache-error.log` and
-`./runtime/logs/apache-access.log`. PHP logs could be found in
-`./runtime/logs/php-error.log`.
+Built-in PHP function mail() might be used to send email if valid SMTP
+credentials provided in SMTP_* variables at
+[docker-compose.override.yml](./docker/docker-compose.override.yml.sample).
 
-The `mysql` service uses [native MySQL image][https://hub.docker.com/_/mysql/]
-version 5.7 to setup database. All files stored in `./runtime/mysql`. The
-database is available in command line through command like
-`docker-compose exec mysql mysql dbname`.
+The project available at default HTTP port 80, as well as MySQL at 3306. Default
+project timezone is UTC. These and other values might be changed through
+`docker-compose.override.yml` mentioned above.
 
-SMTP service could be configured through variables like `SMTP_*` in `docker.env`
-at project root. See `docker.env.dist` for example.
+Directory `runtime` created at startup and is only writable by PHP to be used
+as storage for temporary files, cache, etc.
 
-[1]: https://github.com/tpn/msmtp
+There is also `runtime/logs` used for logs:
+
+- `runtime/logs/apache-access.log` - combined Apache requests log
+- `runtime/logs/apache-error.log` - Apache error log
+- `runtime/logs/php-error.log` - PHP error log
+- `runtime/logs/msmtp.log` - sendmail ([msmtp](https://github.com/tpn/msmtp)) log
+
+You might want to run php application from command line with commend:
+
+    docker-compose exec web src/some.php
+
+To access MySQL you can run following command:
+
+    docker-compose exec db mysql
+
+Root password is empty by default. You might want to use any other client to get
+access to the database.

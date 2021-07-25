@@ -1,4 +1,4 @@
-ARG PHP_IMAGE_VERSION
+ARG PHP_IMAGE_VERSION=8.0
 FROM php:${PHP_IMAGE_VERSION}-apache
 MAINTAINER Alexey Shtokalo <alexey@shtokalo.net>
 
@@ -8,11 +8,11 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends
 
 # configure timezone
-ARG TIMEZONE
+ARG TZ=UTC
 RUN set -ex; \
     unlink /etc/localtime; \
-    ln -snf /usr/share/zoneinfo/$TIMEZONE /etc/localtime; \
-    echo $TIMEZONE > /etc/timezone
+    ln -snf /usr/share/zoneinfo/$TZ /etc/localtime; \
+    echo $TZ > /etc/timezone
 
 # install light SMTP client for mail support
 RUN set -ex; \
@@ -35,8 +35,7 @@ RUN install-php-extensions \
 
 # configure environment
 ENV COMPOSER_ALLOW_SUPERUSER=1 \
-    TIMEZONE=$TIMEZONE \
-    PHP_USER_ID=33 \
+    TZ=$TZ \
     PHP_ENABLE_XDEBUG=0 \
     PATH=/app:/app/vendor/bin:/root/.composer/vendor/bin:$PATH \
     TERM=linux
@@ -105,4 +104,5 @@ VOLUME /app
 COPY docker-entrypoint.sh /usr/local/bin/
 
 ENTRYPOINT ["docker-entrypoint.sh"]
+
 CMD ["apache2-foreground"]
