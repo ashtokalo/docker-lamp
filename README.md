@@ -27,7 +27,7 @@ web         contains the entry script and Web resources
 It would better to use [Composer](http://getcomposer.org/) to start development.
 You can try with following following command:
 
-    composer create-project --prefer-dist ashtokalo/lampeton app
+    composer create-project -s dev --prefer-dist ashtokalo/lampeton app
 
 The command creates directory `app` (you can choose a different one) with this
 project template. Otherwise, you can download and extract files from main branch
