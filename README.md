@@ -22,7 +22,7 @@ src         contains the application code
 web         contains the entry script and Web resources
 ```
 
-## How to use
+## Installation
 
 It would better to use [Composer](http://getcomposer.org/) to start development.
 You can try with following following command:
@@ -89,3 +89,20 @@ To access MySQL you can run following command:
 
 Root password is empty by default. You might want to use any other client to get
 access to the database.
+
+## Contributing
+
+Contributions are welcome and accepted via pull requests on [Github](https://github.com/ashtokalo/lampeton):
+
+- **Document any change in behaviour** - Make sure the `README.md` and any other relevant documentation are kept up-to-date.
+
+- **Create feature branches** - Don't ask to pull from your main branch.
+
+- **One pull request per feature** - If you want to do more than one thing, send multiple pull requests.
+
+- **Send coherent history** - Make sure each individual commit in your pull request is meaningful.
+If you had to make multiple intermediate commits while developing, please [squash them](http://www.git-scm.com/book/en/v2/Git-Tools-Rewriting-History#Changing-Multiple-Commit-Messages) before submitting.
+
+## License
+
+The MIT License (MIT). Refer to the [License](LICENSE) for more information.
