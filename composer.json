@@ -15,6 +15,9 @@
             "email": "alexey@shtokalo.net"
         }
     ],
+    "config": {
+        "optimize-autoloader": true
+    },
     "minimum-stability": "dev",
     "require": {
 

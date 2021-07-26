@@ -41,7 +41,7 @@ or in background mode:
 
     docker-compose up -d
 
-It might takes a time at first start because it need to build an image for the
+It might takes a time at first start because it need to download images for the
 `web` and `db` services.
 
 ## Usage
@@ -61,13 +61,11 @@ through Apache SetEnv.
 
 A few more environment variables available by default:
 
-- `DB_DSN`  - PHP PDO data source name;
-- `DB_TYPE` - type of database, at the moment is always `mysql`;
-- `DB_HOST` - the hostname of MySQL, by default is `mysql`;
-- `DB_PORT` - port number to connect to MySQL, by default is `3306`;
-- `DB_USER` - user to connect to MySQL, by default is `root`;
-- `DB_PASSWORD` - password to connect to MySQL, by default is empty;
-- `DB_DATABASE` - name of database in MySQL, by default is `dbname`.
+- `MYSQL_HOST` - the hostname of MySQL, by default is `mysql`;
+- `MYSQL_PORT` - port number to connect to MySQL, by default is `3306`;
+- `MYSQL_USER` - user to connect to MySQL, by default is `root`;
+- `MYSQL_PASSWORD` - password to connect to MySQL, by default is empty;
+- `MYSQL_DATABASE` - name of database in MySQL, by default is `dbname`.
 
 Directory `runtime` used as storage for runtime resources, like cache, uploaded
 files, etc. By default there is only one directory `runtime/mysql` used by
@@ -102,7 +100,7 @@ Other changes requires project restarting:
 
 You might want to run some application script from command line with commend:
 
-    docker-compose exec web src/some.php
+    docker-compose exec web php src/Example.php
 
 To access MySQL you can run following command:
 
@@ -111,22 +109,25 @@ To access MySQL you can run following command:
 Root password is empty by default. You might want to use any other client to get
 access to the database.
 
-The project already contains Composer and it's PSR-4 ready. So all files under
-the `src` directory uses namespace `app`. Don't forget to change project name,
-description and author in `composer.json` to yours.
+The project already contains latest Composer with PSR-4 autoload mapping and
+`src` directory is mapped to `app` namespace. Don't forget to change project
+name, description and author in `composer.json` to yours. Happy coding!
 
 ## Contributing
 
 Contributions are welcome and accepted via pull requests on [Github](https://github.com/ashtokalo/lampeton):
 
-- **Document any change in behaviour** - Make sure the `README.md` and any other relevant documentation are kept up-to-date.
+- **Document any change in behaviour** - Make sure the `README.md` and any other
+relevant documentation are kept up-to-date.
 
 - **Create feature branches** - Don't ask to pull from your main branch.
 
-- **One pull request per feature** - If you want to do more than one thing, send multiple pull requests.
+- **One pull request per feature** - If you want to do more than one thing, send
+multiple pull requests.
 
-- **Send coherent history** - Make sure each individual commit in your pull request is meaningful.
-If you had to make multiple intermediate commits while developing, please [squash them](http://www.git-scm.com/book/en/v2/Git-Tools-Rewriting-History#Changing-Multiple-Commit-Messages) before submitting.
+- **Send coherent history** - Make sure each individual commit in your pull
+request is meaningful. If you had to make multiple intermediate commits while
+developing, please [squash them](http://www.git-scm.com/book/en/v2/Git-Tools-Rewriting-History#Changing-Multiple-Commit-Messages) before submitting.
 
 ## License
 

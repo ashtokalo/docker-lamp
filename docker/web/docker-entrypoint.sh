@@ -104,13 +104,11 @@ fi
 if [ ! -v MYSQL_DATABASE ]; then
     MYSQL_DATABASE="dbname"
 fi
-{ echo "SetEnv DB_TYPE 'mysql'";
-  echo "SetEnv DB_HOST '$MYSQL_HOST'";
-  echo "SetEnv DB_PORT '$MYSQL_HOST'";
-  echo "SetEnv DB_USER '$MYSQL_USER'";
-  echo "SetEnv DB_PASSWORD '$MYSQL_PASSWORD'";
-  echo "SetEnv DB_DATABASE '$MYSQL_DATABASE'";
-  echo "SetEnv DB_DSN 'mysql:host=$MYSQL_HOST;port=$MYSQL_PORT;dbname=$MYSQL_DATABASE'";
+{ echo "SetEnv MYSQL_HOST '$MYSQL_HOST'";
+  echo "SetEnv MYSQL_PORT '$MYSQL_PORT'";
+  echo "SetEnv MYSQL_USER '$MYSQL_USER'";
+  echo "SetEnv MYSQL_PASSWORD '$MYSQL_PASSWORD'";
+  echo "SetEnv MYSQL_DATABASE '$MYSQL_DATABASE'";
 } >> /etc/apache2/conf-available/php-env-vars.conf
 
 ################################################################################
@@ -158,11 +156,5 @@ fi
   echo 'html_errors = Off'; \
   echo "date.timezone = $TZ"; \
 } > /usr/local/etc/php/conf.d/error-logging.ini
-
-# unset all environment variables used only to start docker
-for ENV_VAR_NAME in SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASSWORD SMTP_FROM \
-   ADMIN_EMAIL HOST_NAME PHP_ENABLE_XDEBUG PHP_XDEBUG_PORT PHP_XDEBUG_IDEKEY \
-   MYSQL_PORT MYSQL_HOST MYSQL_USER MYSQL_PASSWORD MYSQL_DATABASE; \
-   do unset $ENV_VAR_NAME; done;
 
 exec "$@"

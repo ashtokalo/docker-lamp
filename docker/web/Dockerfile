@@ -89,6 +89,8 @@ VOLUME /app
 
 COPY docker-entrypoint.sh /usr/local/bin/
 
+WORKDIR /app
+
 ENTRYPOINT ["docker-entrypoint.sh"]
 
 CMD ["apache2-foreground"]
