@@ -1,0 +1,94 @@
+version: "3.7"
+
+services:
+  web:
+
+    #
+    # Uncomment next line to change image name
+    #
+
+    #image: ashtokalo/lampeton-web:8.0
+
+    #
+    # or next block to build image from docker/web
+    #
+
+    #build:
+    #  context: ./docker/web
+    #  dockerfile: ./Dockerfile
+    #  args:
+    #    # PHP version might be 7.4 or 8.0 (default)
+    #    - PHP_IMAGE_VERSION=8.0
+    #    # timezone used to build image, and default value at runtime
+    #    - TZ=UTC
+
+    ports:
+
+      #
+      # Change 123 to any other port to be used instead of default HTTP 80
+      #
+
+      #- 123:80
+
+    environment:
+      #
+      # Timezone to override the value in image
+      #
+
+      #- TZ=UTC
+
+      #
+      # Change value to 1 to enable XDEBUG on port 9055 with idekey LAMPETON
+      #
+
+      #- PHP_ENABLE_XDEBUG=1
+
+      #
+      # admin email used in Apache ServerAdmin
+      #
+
+      #- ADMIN_EMAIL=admin@example.com
+
+      #
+      # SMTP credentials, port 587 assume using tls, see config/msmtprc.sample
+      #
+
+      #- SMTP_PORT=587
+      #- SMTP_HOST=localhost
+      #- SMTP_USER=user@xample.com
+      #- SMTP_PASSWORD=123456
+      #- SMTP_FROM=user@example.com
+
+      #
+      # MySQL credentials to connect
+      #
+
+      #- MYSQL_HOST=db
+      #- MYSQL_USER=dbuser
+      #- MYSQL_PASSWORD=dbpassword
+      #- MYSQL_DATABASE=dbname
+
+  db:
+
+    ports:
+
+      #
+      # Change 34567 to any other port to be used instead of default MySQL port 3306
+      #
+
+      #- 34567:3306
+
+    environment:
+      #
+      # Timezone for database
+      #
+      #- TZ=UTC
+
+      #
+      # Alternative settings for MySQL
+      #
+      #- MYSQL_USER=dbuser
+      #- MYSQL_PASSWORD=dbpassword
+      #- MYSQL_DATABASE=dbname
+      #- MYSQL_ALLOW_EMPTY_PASSWORD=1
+      #- MYSQL_ROOT_PASSWORD=

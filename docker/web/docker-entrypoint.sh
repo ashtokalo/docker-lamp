@@ -2,6 +2,13 @@
 set -Eeuo pipefail
 cd /app/docker/web
 
+# update timezone if required
+if [ "$TZ" != `cat /etc/timezone` ]; then
+  unlink /etc/localtime;
+  ln -snf /usr/share/zoneinfo/$TZ /etc/localtime;
+  echo $TZ > /etc/timezone
+fi
+
 ################################################################################
 ##
 ## Prepare directories for runtime files and logs
@@ -10,11 +17,11 @@ cd /app/docker/web
 if [ ! -d /app/runtime ]; then
     mkdir /app/runtime
 fi;
-if [ ! -d /app/runtime/logs ]; then
-    mkdir /app/runtime/logs
+if [ ! -d /app/logs ]; then
+    mkdir /app/logs
 fi;
 chmod ugo+w /app/runtime
-chmod ugo+w /app/runtime/logs
+chmod ugo+w /app/logs
 
 ################################################################################
 ##
@@ -27,7 +34,6 @@ chmod ugo+w /app/runtime/logs
 if [ -f /app/config/msmtprc ]; then
     cp /app/config/msmtprc /etc/msmtprc;
 elif [ -v SMTP_HOST ] && [ -v SMTP_USER ] && [ -v SMTP_PASSWORD ]; then
-    LOG="/app/runtime/logs/msmtp.log";
     if [ ! -v SMTP_PORT ]; then
         SMTP_PORT=25;
     fi;
@@ -46,11 +52,10 @@ elif [ -v SMTP_HOST ] && [ -v SMTP_USER ] && [ -v SMTP_PASSWORD ]; then
         echo "pasword $SMTP_PASSWORD";
         echo "from $SMTP_FROM";
         echo "auth on";
-        echo "logfile $LOG";
+        echo "logfile /app/logs/msmtp.log";
     } >> /etc/msmtprc;
 else
     echo "msmtp: not configured properly";
-    echo "DISABLED" > /app/runtime/logs/msmtp.log;
 fi;
 # file must belongs to user who will send emails
 if [ -f /etc/msmtprc ]; then
@@ -140,6 +145,19 @@ if [ -v PHP_ENABLE_XDEBUG ] && [ "$PHP_ENABLE_XDEBUG" == "1" ]; then
     echo "xdebug.idekey=LAMPETON";
   } >> /usr/local/etc/php/conf.d/docker-xdebug.ini;
 fi
+
+# configure error logging - https://www.php.net/manual/en/errorfunc.constants.php
+{ echo 'error_reporting = E_ERROR | E_WARNING | E_PARSE | E_CORE_ERROR | E_CORE_WARNING | E_COMPILE_ERROR | E_COMPILE_WARNING | E_RECOVERABLE_ERROR'; \
+  echo 'display_errors = Off'; \
+  echo 'display_startup_errors = Off'; \
+  echo 'log_errors = On'; \
+  echo 'error_log = /app/logs/php-error.log'; \
+  echo 'log_errors_max_len = 1024'; \
+  echo 'ignore_repeated_errors = On'; \
+  echo 'ignore_repeated_source = Off'; \
+  echo 'html_errors = Off'; \
+  echo "date.timezone = $TZ"; \
+} > /usr/local/etc/php/conf.d/error-logging.ini
 
 # unset all environment variables used only to start docker
 for ENV_VAR_NAME in SMTP_HOST SMTP_PORT SMTP_USER SMTP_PASSWORD SMTP_FROM \

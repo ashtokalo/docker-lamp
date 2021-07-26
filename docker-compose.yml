@@ -6,13 +6,8 @@ networks:
 services:
 
   web:
-    image: lampeton_web
-    build:
-      context: ./docker/web
-      dockerfile: ./Dockerfile
-      args:
-        - PHP_IMAGE_VERSION=8.0
-        - TZ=UTC
+    # https://hub.docker.com/repository/docker/ashtokalo/lampeton-web/tags
+    image: ashtokalo/lampeton-web:8.0
     ports:
       - 80:80
     environment:

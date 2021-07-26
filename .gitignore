@@ -4,6 +4,7 @@ config/php.ini
 config/msmtprc
 docker-compose.override.yml
 runtime/*
+logs/*
 vendor/*
 web/.htaccess
 composer.lock

@@ -16,8 +16,8 @@ The [other templates](https://github.com/ashtokalo/lampeton/branches) available 
 config      contains all configuration files
 docker      contains resources to build docker environments
     web     contains Apache httpd in conjunction with PHP
-runtime     contains files generated during runtime, the only writable directory
-    logs    contains logs from Apache, PHP and SMTP services
+runtime     contains files generated during runtime
+logs        contains logs from Apache, PHP and SMTP services
 src         contains the application code
 web         contains the entry script and Web resources
 ```
@@ -44,42 +44,63 @@ or in background mode:
 It might takes a time at first start because it need to build an image for the
 `web` and `db` services.
 
-## Template
+## Usage
 
-The PHP works as mod_php in conjunction with Apache and most popular modules.
-A few environment variables contains helpful details to connect to database:
+The template assumes that all project source code will be stored to `src`
+directory and only entry script `index.php` and some static resources will be
+placed to the `web` directory. The `web` directory of the project used as a
+document root in Apache, so all other files are never available through HTTP.
+Any request of file or directory at [http://localhost] will be redirected to
+`web/index.php` if they doesn't exists. The default HTTP port is 80 and it's
+subject to configure.
 
-- `MYSQL_DSN` - PHP PDO data source name;
-- `MYSQL_HOST` - the hostname of MySQL, by defailt is `mysql`;
-- `MYSQL_PORT` - port number to connect to MySQL, by default is `3306`;
-- `MYSQL_USER` - user to connect to MySQL, by default is `root`;
-- `MYSQL_PASSWORD` - password to connect to MySQL, by default is empty;
-- `MYSQL_DATABASE` - name of database in MySQL, by default is `dbname`.
+Configuration files might be placed to `config` directory to keep them all in
+one place. You might start with `config/php.env` with key-value properties to
+configure application. These values will be available through PHP `getenv()`
+through Apache SetEnv.
 
-The `web` directory of the project used as a document root in Apache, so all
-other files are never available through HTTP. Any request of file or directory
-that doesn't exists will be redirected to `web/index.php`, so you can process
-the request as you wish.
+A few more environment variables available by default:
 
-Built-in PHP function mail() might be used to send email if valid SMTP
-credentials provided in SMTP_* variables at
-[docker-compose.override.yml](./docker/docker-compose.override.yml.sample).
+- `DB_DSN`  - PHP PDO data source name;
+- `DB_TYPE` - type of database, at the moment is always `mysql`;
+- `DB_HOST` - the hostname of MySQL, by default is `mysql`;
+- `DB_PORT` - port number to connect to MySQL, by default is `3306`;
+- `DB_USER` - user to connect to MySQL, by default is `root`;
+- `DB_PASSWORD` - password to connect to MySQL, by default is empty;
+- `DB_DATABASE` - name of database in MySQL, by default is `dbname`.
 
-The project available at default HTTP port 80, as well as MySQL at 3306. Default
-project timezone is UTC. These and other values might be changed through
-`docker-compose.override.yml` mentioned above.
+Directory `runtime` used as storage for runtime resources, like cache, uploaded
+files, etc. By default there is only one directory `runtime/mysql` used by
+`mysql` service to store the database files. This directory created at startup.
 
-Directory `runtime` created at startup and is only writable by PHP to be used
-as storage for temporary files, cache, etc.
+All services and application logs might be stored into `logs` directory. This
+directory created at startup and might contains following files:
 
-There is also `runtime/logs` used for logs:
+- `logs/apache-access.log` - combined Apache requests log
+- `logs/apache-error.log` - Apache error log
+- `logs/php-error.log` - PHP error log
+- `logs/msmtp.log` - sendmail ([msmtp](https://github.com/tpn/msmtp)) log
 
-- `runtime/logs/apache-access.log` - combined Apache requests log
-- `runtime/logs/apache-error.log` - Apache error log
-- `runtime/logs/php-error.log` - PHP error log
-- `runtime/logs/msmtp.log` - sendmail ([msmtp](https://github.com/tpn/msmtp)) log
+The PHP works as mod_php in conjunction with Apache and most popular modules
+in docker container `web`. By default container uses pre-built image from docker
+hub. You might want change the image or it's features, so the image sources
+available at `docker\web`. The image includes [SMTP client](https://github.com/tpn/msmtp)
+and allows to use `sendmail` in command line and `mail()` function in PHP to
+send emails if valid SMTP credentials provided in `docker-compose.yml`.
 
-You might want to run php application from command line with commend:
+Most options might be changed by overriding `docker-compose.yml`. Check on
+[sample config](./docker-compose.override.yml.sample). You need copy the file to
+`docker-compose.override.yml` to make changes here. Changing PHP version or
+timezone might requires image building:
+
+    docker-compose build
+
+Other changes requires project restarting:
+
+    docker-compose down
+    docker-compose up
+
+You might want to run some application script from command line with commend:
 
     docker-compose exec web src/some.php
 
@@ -89,6 +110,10 @@ To access MySQL you can run following command:
 
 Root password is empty by default. You might want to use any other client to get
 access to the database.
+
+The project already contains Composer and it's PSR-4 ready. So all files under
+the `src` directory uses namespace `app`. Don't forget to change project name,
+description and author in `composer.json` to yours.
 
 ## Contributing
 
